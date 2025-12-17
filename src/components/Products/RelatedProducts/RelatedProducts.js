@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
-import { CategoryWiseProducts } from "@/app/actions/actions";
+import { CategoryWiseProducts } from "@/actions/actions";
 import ProductCard from "../ProductCard/ProductCard";
 const RelatedProducts = async ({ slug }) => {
 const products = await CategoryWiseProducts(slug)
@@ -13,7 +13,7 @@ const products = await CategoryWiseProducts(slug)
 
   return (
     <section className="my-10">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 border-b pb-2 text-gray-800">
+      <h2 className="text-xl font-semibold mb-4 border-b border-border pb-2 ">
         Related Products
       </h2>
 

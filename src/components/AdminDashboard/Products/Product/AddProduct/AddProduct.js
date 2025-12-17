@@ -1,409 +1,652 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 import Image from "next/image";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { useForm, useFieldArray } from "react-hook-form";
+import RichTextEditor from "@/components/RichTextEditor/RichTextEditor";
+import { X } from "lucide-react";
 
 const AddProduct = ({ setAddFlag }) => {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    productName: "",
-    thumbnail: "",
-    category: "",
-    images: [],
-    offerPrice: "",
-    regularPrice: "",
-    descriptions: "",
-    stock: 0,
-    status: "regular",
-    shipping_fee: "free",
+
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [thumbnailType, setThumbnailType] = useState("upload");
+  const [categories, setCategories] = useState([]);
+
+  // -------------------------------
+  // React Hook Form Initial Setup
+  // -------------------------------
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      productName: "",
+      thumbnail: "",
+      thumbnailAlt: "",
+      category: "",
+      images: [{ value: "", alt: "", type: "upload", preview: null }],
+      offerPrice: "",
+      regularPrice: "",
+      descriptions: "",
+      stock: "",
+      status: "regular",
+      shipping_fee: "free",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+      seoImage: "",
+    },
   });
 
-  const [thumbnailType, setThumbnailType] = useState("upload");
-  const [thumbnailPreview, setThumbnailPreview] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [imageFields, setImageFields] = useState([
-    { type: "upload", value: "", preview: null },
-  ]);
-  const [loading, setLoading] = useState(false);
+  // Dynamic image fields
+  const { fields, append, remove, update } = useFieldArray({
+    control,
+    name: "images",
+  });
 
-  // -----------------------------
-  // FETCH CATEGORIES
-  // -----------------------------
+  const descriptions = watch("descriptions");
+  const images = watch("images");
+  const thumbnail = watch("thumbnail");
+
+  // -------------------------------
+  // Load Categories
+  // -------------------------------
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await axios.get("/pages/api/products/category");
-        if (data?.success) {
-          setCategories(data.categories.filter((cat) => cat.status));
+    axios
+      .get("/pages/api/products/category", {
+        headers: { "x-request-source": "12Hirock@" },
+      })
+      .then((res) => {
+        if (res.data.success) {
+          setCategories(res.data.categories.filter((c) => c.status));
         }
-      } catch (error) {
-        toast.error("Failed to load categories");
-      }
-    };
-    fetchCategories();
+      })
+      .catch(() => toast.error("Failed to load categories"));
   }, []);
 
-  // -----------------------------
-  // HANDLE FORM CHANGE
-  // -----------------------------
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // -----------------------------
-  // THUMBNAIL HANDLERS
-  // -----------------------------
+  // -------------------------------
+  // Thumbnail Upload
+  // -------------------------------
   const handleThumbnailUpload = (file) => {
+    if (!file) return;
+
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormData((prev) => ({ ...prev, thumbnail: reader.result }));
+      setValue("thumbnail", reader.result);
       setThumbnailPreview(reader.result);
     };
-    if (file) reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
   };
 
-  const handleThumbnailUrl = (url) => {
-    setFormData((prev) => ({ ...prev, thumbnail: url }));
-    setThumbnailPreview(url || null);
-  };
+  // -------------------------------
+  // Handle image field change
+  // -------------------------------
+  const handleImageChange = (i, type, fileOrUrl) => {
+    const reader = new FileReader();
 
-  // -----------------------------
-  // IMAGE HANDLERS
-  // -----------------------------
-  const handleImageChange = (index, type, value) => {
-    const fields = [...imageFields];
     if (type === "upload") {
-      const reader = new FileReader();
+      if (!fileOrUrl) return;
       reader.onloadend = () => {
-        fields[index].value = reader.result;
-        fields[index].preview = reader.result;
-        setImageFields(fields);
-        setFormData((prev) => ({
-          ...prev,
-          images: fields.map((f) => f.value).filter(Boolean),
-        }));
+        update(i, {
+          ...fields[i],
+          type: "upload",
+          value: reader.result,
+          preview: reader.result,
+        });
       };
-      if (value) reader.readAsDataURL(value);
+      reader.readAsDataURL(fileOrUrl);
     } else {
-      fields[index].value = value;
-      fields[index].preview = value || null;
-      setImageFields(fields);
-      setFormData((prev) => ({
-        ...prev,
-        images: fields.map((f) => f.value).filter(Boolean),
-      }));
+      update(i, {
+        ...fields[i],
+        type: "url",
+        value: fileOrUrl,
+        preview: fileOrUrl || null,
+      });
     }
   };
 
-  const addImageField = () =>
-    setImageFields([
-      ...imageFields,
-      { type: "upload", value: "", preview: null },
-    ]);
+  // -------------------------------
+  // Submit
+  // -------------------------------
+  const onSubmit = async (data) => {
+    if (!data.descriptions.trim()) {
+      toast.error("Description is required");
+      return;
+    }
 
-  const removeImageField = (index) => {
-    const fields = imageFields.filter((_, i) => i !== index);
-    setImageFields(fields);
-    setFormData((prev) => ({
-      ...prev,
-      images: fields.map((f) => f.value).filter(Boolean),
-    }));
-  };
+    const payload = {
+      ...data,
+      images: data.images.map((img) => img.value).filter(Boolean),
+      imagesAlt: data.images.map((img) => img.alt || data.productName),
+      seoKeywords: data.seoKeywords
+        ?.split(",")
+        .map((k) => k.trim())
+        .filter((k) => k.length > 0),
+    };
 
-  // -----------------------------
-  // SUBMIT
-  // -----------------------------
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
     try {
-      const res = await axios.post("/pages/api/products/product", formData);
+      const res = await axios.post("/pages/api/products/product", payload);
       if (res.data.success) {
         toast.success("Product Added Successfully!");
         router.refresh();
-        setFormData({
-          productName: "",
-          thumbnail: "",
-          category: "",
-          images: [],
-          offerPrice: "",
-          regularPrice: "",
-          descriptions: "",
-          stock: 0,
-          status: "regular",
-          shipping_fee: "free",
-        });
-        setThumbnailType("upload");
+        reset();
         setThumbnailPreview(null);
-        setImageFields([{ type: "upload", value: "", preview: null }]);
-      } else {
-        toast.error(res.data.message || "Failed to add product");
       }
-    } catch (error) {
-      toast.error(error.message || "Something went wrong!");
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      toast.error(err.message || "Something went wrong!");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg space-y-6">
-      <h2 className="text-3xl font-bold text-center text-gray-800">
-        Add New Product
-      </h2>
-      <button onClick={() => setAddFlag(false)}>Cancel</button>
+    <div className="relative max-w-6xl mx-auto p-8 bg-white rounded-md shadow-xl border border-gray-100">
+      {/* Header */}
+      <div className="text-center mb-4">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Add New Product
+        </h2>
+        <p className="text-gray-600">
+          Fill in the details to add a new product to your store
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* PRODUCT NAME */}
-        <input
-          type="text"
-          name="productName"
-          placeholder="Product Name"
-          value={formData.productName || ""}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-
-        {/* CATEGORY DROPDOWN */}
-        <select
-          name="category"
-          value={formData.category || ""}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+      {/* Cancel Button */}
+      <div className=" absolute right-5 top-5">
+        <button
+          onClick={() => setAddFlag(false)}
+          className="p-2 text-sm font-medium text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition-colors"
         >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat.slug}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+          <X />
+        </button>
+      </div>
 
-        {/* THUMBNAIL */}
-        <div className="flex items-center gap-4 mb-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={thumbnailType === "upload"}
-              onChange={() => {
-                setThumbnailType("upload");
-                setFormData((prev) => ({ ...prev, thumbnail: "" }));
-                setThumbnailPreview(null);
-              }}
-            />
-            Upload
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={thumbnailType === "url"}
-              onChange={() => {
-                setThumbnailType("url");
-                setFormData((prev) => ({ ...prev, thumbnail: "" }));
-                setThumbnailPreview(null);
-              }}
-            />
-            URL
-          </label>
-        </div>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="space-y-8 max-h-[50vh] overflow-y-scroll">
+          {/* Basic Information Card */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+              Basic Information
+            </h3>
 
-        {thumbnailType === "upload" ? (
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleThumbnailUpload(e.target.files[0])}
-            className="w-full border border-gray-300 rounded-lg p-2"
-          />
-        ) : (
-          <input
-            type="text"
-            placeholder="Thumbnail URL"
-            value={formData.thumbnail || ""}
-            onChange={(e) => handleThumbnailUrl(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-2"
-          />
-        )}
-
-        {thumbnailPreview && (
-          <div className="w-32 h-32 relative border rounded overflow-hidden">
-            <Image
-              src={thumbnailPreview}
-              alt="Thumbnail"
-              fill
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        {/* ADDITIONAL IMAGES */}
-        <div>
-          <h4 className="font-medium mb-2 text-gray-700">Additional Images</h4>
-          {imageFields.map((img, i) => (
-            <div key={i} className="mb-4 border p-3 rounded-lg space-y-2">
-              <div className="flex gap-4 mb-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={img.type === "upload"}
-                    onChange={() => {
-                      const fields = [...imageFields];
-                      fields[i].type = "upload";
-                      fields[i].value = "";
-                      fields[i].preview = null;
-                      setImageFields(fields);
-                    }}
-                  />
-                  Upload
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Product Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Name *
                 </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={img.type === "url"}
-                    onChange={() => {
-                      const fields = [...imageFields];
-                      fields[i].type = "url";
-                      fields[i].value = "";
-                      fields[i].preview = null;
-                      setImageFields(fields);
-                    }}
-                  />
-                  URL
-                </label>
+                <input
+                  {...register("productName", { required: true })}
+                  placeholder="Enter product name"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+                {errors.productName && (
+                  <p className="mt-2 text-sm text-red-600">
+                    Product Name is required
+                  </p>
+                )}
               </div>
 
-              {img.type === "upload" ? (
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    handleImageChange(i, "upload", e.target.files[0])
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-lg"
-                />
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  {...register("category", { required: true })}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.slug}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Thumbnail Card */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+              Product Thumbnail
+            </h3>
+
+            {/* Thumbnail Type Selector */}
+            <div className="flex gap-6 mb-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="radio"
+                    name="thumbnailType"
+                    checked={thumbnailType === "upload"}
+                    onChange={() => {
+                      setThumbnailType("upload");
+                      setValue("thumbnail", "");
+                      setThumbnailPreview(null);
+                    }}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      thumbnailType === "upload"
+                        ? "border-blue-600"
+                        : "border-gray-200"
+                    } flex items-center justify-center`}
+                  >
+                    {thumbnailType === "upload" && (
+                      <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+                <span className="text-gray-700 font-medium">Upload Image</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="radio"
+                    name="thumbnailType"
+                    checked={thumbnailType === "url"}
+                    onChange={() => {
+                      setThumbnailType("url");
+                      setValue("thumbnail", "");
+                      setThumbnailPreview(null);
+                    }}
+                    className="sr-only"
+                  />
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 ${
+                      thumbnailType === "url"
+                        ? "border-blue-600"
+                        : "border-gray-200"
+                    } flex items-center justify-center`}
+                  >
+                    {thumbnailType === "url" && (
+                      <div className="w-2.5 h-2.5 bg-blue-600 rounded-full"></div>
+                    )}
+                  </div>
+                </div>
+                <span className="text-gray-700 font-medium">Use URL</span>
+              </label>
+            </div>
+
+            {/* Thumbnail Input */}
+            <div className="space-y-4">
+              {thumbnailType === "upload" ? (
+                <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleThumbnailUpload(e.target.files[0])}
+                    className="w-full"
+                  />
+                  <p className="text-gray-500 text-sm mt-2">
+                    Click or drag to upload
+                  </p>
+                </div>
               ) : (
                 <input
-                  type="text"
-                  placeholder="Image URL"
-                  value={img.value || ""}
-                  onChange={(e) => handleImageChange(i, "url", e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  {...register("thumbnail")}
+                  placeholder="https://example.com/image.jpg"
+                  onChange={(e) => setThumbnailPreview(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 />
               )}
 
-              {img.preview && (
-                <div className="w-24 h-24 relative border rounded overflow-hidden">
-                  <Image
-                    src={img.preview}
-                    alt={`Image ${i + 1}`}
-                    fill
-                    className="object-cover"
-                  />
+              {/* Thumbnail Alt Text */}
+              <input
+                {...register("thumbnailAlt")}
+                placeholder="Thumbnail alt text (for SEO)"
+                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              />
+
+              {/* Preview */}
+              {thumbnailPreview && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    Preview
+                  </p>
+                  <div className="w-40 h-40 relative border-2 border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <Image
+                      src={thumbnailPreview}
+                      alt="preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
                 </div>
               )}
-
-              {imageFields.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeImageField(i)}
-                  className="text-red-600 hover:underline"
-                >
-                  Remove
-                </button>
-              )}
             </div>
-          ))}
+          </div>
 
-          <button
-            type="button"
-            onClick={addImageField}
-            className="py-2 px-4 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            Add Image
-          </button>
+          {/* Gallery Images Card */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+              Gallery Images
+            </h3>
+
+            <div className="space-y-4">
+              {fields.map((img, i) => (
+                <div
+                  key={img.id}
+                  className="bg-white rounded-xl border border-gray-200 p-5 space-y-4"
+                >
+                  {/* Image Type Selector */}
+                  <div className="flex gap-6">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <div className="relative">
+                        <input
+                          type="radio"
+                          checked={img.type === "upload"}
+                          onChange={() =>
+                            update(i, {
+                              ...img,
+                              type: "upload",
+                              value: "",
+                              preview: "",
+                            })
+                          }
+                          className="sr-only"
+                        />
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            img.type === "upload"
+                              ? "border-blue-600"
+                              : "border-gray-200"
+                          } flex items-center justify-center`}
+                        >
+                          {img.type === "upload" && (
+                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-gray-700 text-sm">Upload</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <div className="relative">
+                        <input
+                          type="radio"
+                          checked={img.type === "url"}
+                          onChange={() =>
+                            update(i, {
+                              ...img,
+                              type: "url",
+                              value: "",
+                              preview: "",
+                            })
+                          }
+                          className="sr-only"
+                        />
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            img.type === "url"
+                              ? "border-blue-600"
+                              : "border-gray-200"
+                          } flex items-center justify-center`}
+                        >
+                          {img.type === "url" && (
+                            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-gray-700 text-sm">URL</span>
+                    </label>
+                  </div>
+
+                  {/* Input Field */}
+                  {img.type === "upload" ? (
+                    <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 hover:border-blue-400 transition-colors">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          handleImageChange(i, "upload", e.target.files[0])
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  ) : (
+                    <input
+                      value={img.value}
+                      placeholder="Image URL"
+                      onChange={(e) =>
+                        handleImageChange(i, "url", e.target.value)
+                      }
+                      className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    />
+                  )}
+
+                  {/* Alt Text */}
+                  <input
+                    {...register(`images.${i}.alt`)}
+                    placeholder="Image alt text"
+                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+
+                  {/* Preview and Actions */}
+                  <div className="flex items-center justify-between">
+                    {img.preview && (
+                      <div className="w-16 h-16 relative border border-gray-200 rounded-lg overflow-hidden">
+                        <Image
+                          src={img.preview}
+                          alt="preview"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
+
+                    {fields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => remove(i)}
+                        className="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Image Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  append({ value: "", alt: "", type: "upload", preview: null })
+                }
+                className="w-full py-3.5 border-2 border-dashed border-gray-200 rounded-xl text-gray-600 hover:text-gray-900 hover:border-gray-400 transition-all hover:bg-gray-50"
+              >
+                + Add Another Image
+              </button>
+            </div>
+          </div>
+
+          {/* Pricing & Inventory Card */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+              Pricing & Inventory
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Offer Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Offer Price *
+                </label>
+                <div className="relative">
+                  {/* <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span> */}
+                  <input
+                    {...register("offerPrice", { required: true })}
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Regular Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Regular Price *
+                </label>
+                <div className="relative">
+                  {/* <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span> */}
+                  <input
+                    {...register("regularPrice", { required: true })}
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Stock */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Stock Quantity *
+                </label>
+                <input
+                  {...register("stock", { required: true })}
+                  type="number"
+                  placeholder="0"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Description Card */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Product Description
+            </h3>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <RichTextEditor
+                value={descriptions}
+                onChange={(v) => setValue("descriptions", v)}
+              />
+            </div>
+          </div>
+
+          {/* Product Settings Card */}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+              Product Settings
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Status
+                </label>
+                <select
+                  {...register("status")}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                >
+                  <option value="regular">Regular</option>
+                  <option value="onSale">On Sale</option>
+                  <option value="new">New</option>
+                  <option value="hot">Hot</option>
+                </select>
+              </div>
+
+              {/* Shipping */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Shipping
+                </label>
+                <select
+                  {...register("shipping_fee")}
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                >
+                  <option value="free">Free Shipping</option>
+                  <option value="paid">Paid Shipping</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* SEO Settings Card */}
+          <div className="bg-linear-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
+              SEO Settings
+            </h3>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  SEO Title
+                </label>
+                <input
+                  {...register("seoTitle")}
+                  placeholder="Optimized title for search engines"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  SEO Description
+                </label>
+                <textarea
+                  {...register("seoDescription")}
+                  rows={3}
+                  placeholder="Brief description for search results"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  SEO Keywords
+                </label>
+                <input
+                  {...register("seoKeywords")}
+                  placeholder="keyword1, keyword2, keyword3"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  SEO Image URL
+                </label>
+                <input
+                  {...register("seoImage")}
+                  placeholder="https://example.com/seo-image.jpg"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* OFFER PRICE */}
-        <input
-          type="number"
-          name="offerPrice"
-          placeholder="Offer Price"
-          value={formData.offerPrice || ""}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        />
-
-        {/* REGULAR PRICE */}
-        <input
-          type="number"
-          name="regularPrice"
-          placeholder="Regular Price"
-          value={formData.regularPrice || ""}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        />
-
-        {/* DESCRIPTION */}
-        <textarea
-          name="descriptions"
-          placeholder="Descriptions"
-          value={formData.descriptions || ""}
-          onChange={handleChange}
-          required
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        />
-
-        {/* STOCK */}
-        <input
-          type="number"
-          name="stock"
-          placeholder="Stock"
-          value={formData.stock || 0}
-          onChange={handleChange}
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        />
-
-        {/* STATUS */}
-        <select
-          name="status"
-          value={formData.status || "regular"}
-          onChange={handleChange}
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        >
-          <option value="regular">Regular</option>
-          <option value="onSale">On Sale</option>
-          <option value="new">New</option>
-        </select>
-
-        {/* SHIPPING FEE */}
-        <select
-          name="shipping_fee"
-          value={formData.shipping_fee || "free"}
-          onChange={handleChange}
-          className="w-full p-3 border border-gray-300 rounded-lg"
-        >
-          <option value="free">Free</option>
-          <option value="paid">Paid</option>
-        </select>
-
-        {/* SUBMIT BUTTON */}
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full py-3 text-white rounded ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-        >
-          {loading ? "Adding Product..." : "Add Product"}
-        </button>
+        {/* Submit Button */}
+        <div className="pt-6">
+          <button
+            type="submit"
+            className="w-full py-4 bg-primary  text-background font-semibold  hover:bg-primary-dark  transition-all shadow-lg"
+          >
+            Add Product
+          </button>
+        </div>
       </form>
     </div>
   );

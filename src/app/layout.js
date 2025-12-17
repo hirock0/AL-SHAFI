@@ -1,18 +1,24 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import ReduxProvider from "@/utils/redux/reduxProvider";
 import { ToastContainer } from "react-toastify";
 import Topbar from "@/components/Topbar/Topbar";
 import Navbar from "@/components/Navbar/Navbar";
+import Footer from "@/components/Footer/Footer";
+import CartSidebar from "@/components/Products/CartSidebar/CartSidebar";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import { ScrollTop } from "@/components/ScrollTop/ScrollTop";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata = {
@@ -23,16 +29,20 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} ${montserrat.variable} antialiased`}>
         <ReduxProvider>
-          <div>
+          <>
             <Topbar />
             <Navbar />
-            {/* <Categories /> */}
-          </div>
-          {children}
+          </>
+          <main className=" md:min-h-[calc(100vh-712px)]">
+            {children}
+            <ScrollTop />
+            <CartSidebar />
+            <Sidebar />
+          </main>
+
+          <Footer />
         </ReduxProvider>
         <ToastContainer position="top-center" />
       </body>

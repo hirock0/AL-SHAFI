@@ -1,18 +1,35 @@
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="h-screen w-full flex items-center justify-center   px-4">
-      <div className="backdrop-blur-xl  rounded-2xl px-10 py-8 flex flex-col items-center shadow-xl">
-        <h1 className="text-7xl font-extrabold drop-shadow-md">404</h1>
-        <p className="text-lg mt-2 opacity-90">Oops! The page you’re looking for doesn't exist.</p>
+    <div className=" flex items-center justify-center px-4 py-8 md:py-12">
+      <div className="text-center space-y-6">
+        {/* Icon */}
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+          <span className="text-2xl">404</span>
+        </div>
 
-        <Link
-          href="/"
-          className="mt-6 px-6 py-3  rounded-lg transition"
-        >
-          Return Home
-        </Link>
+        {/* Text */}
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">
+            Nothing here
+          </h2>
+          <p className="text-gray-500">
+            This page doesn't exist or was removed.
+          </p>
+        </div>
+
+        {/* Button */}
+        {/* <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to safety
+          </Link>
+        </div> */}
       </div>
     </div>
   );

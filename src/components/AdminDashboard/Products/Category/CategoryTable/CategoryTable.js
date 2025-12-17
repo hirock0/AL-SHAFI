@@ -1,4 +1,4 @@
-import CatEditNDelBtn from "@/components/Ui/Products/Category/CatEditNDelBtn/CatEditNDelBtn";
+import CatEditNDelBtn from "@/components/UI/Admin/Category/CatEditNDelBtn/CatEditNDelBtn";
 import Image from "next/image";
 
 const CategoryTable = ({ categories }) => {

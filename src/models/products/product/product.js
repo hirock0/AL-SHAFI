@@ -1,69 +1,100 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import slugify from "slugify";
-const productSchema = new mongoose.Schema(
+
+// Schema
+const productSchema = new Schema(
   {
     productName: {
       type: String,
       required: true,
       trim: true,
     },
+
     slug: {
       type: String,
       unique: true,
       lowercase: true,
       index: true,
     },
+
     thumbnail: {
-      secure_url: { type: String, required: true, default: "" },
-      public_id: { type: String, required: true, default: "" },
+      secure_url: { type: String, default: "" },
+      public_id: { type: String,  default: "" },
+      alt: { type: String, default: "" },
     },
+
     category: {
       type: String,
       required: true,
       trim: true,
     },
-    images: {
-      type: [
-        {
-          secure_url: { type: String, required: true, default: "" },
-          public_id: { type: String, required: true, default: "" },
-        },
-      ],
-      default: [],
-    },
-    offerPrice: {
-      type: Number,
-      required: true,
-    },
-    regularPrice: {
-      type: Number,
-      required: true,
-    },
+
+    images: [
+      {
+        secure_url: { type: String,  default: "" },
+        public_id: { type: String, default: "" },
+        alt: { type: String,  default: "" },
+      },
+    ],
+
+    offerPrice: { type: Number, required: true },
+    regularPrice: { type: Number, required: true },
+
     descriptions: {
       type: String,
       required: true,
       trim: true,
     },
-    stock: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
+
+    stock: { type: Number, default: 0, min: 0 },
+    total_sell: { type: Number, default: 0 },
 
     status: {
       type: String,
-      enum: ["regular", "onSale", "new"],
+      enum: ["regular", "onSale", "new", "hot"],
       default: "regular",
     },
 
     shipping_fee: {
       type: String,
       enum: ["free", "paid"],
-      default: "free",
+      default: "paid",
     },
+
+    // ⭐ SEO Fields
+    seoTitle: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    seoDescription: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    seoKeywords: {
+      type: [String],
+      default: [],
+    },
+
+    seoImage: {
+      type: String,
+      default: "",
+    },
+
+    reviews: [
+      {
+        userName: { type: String, default: "" },
+        email: { type: String, default: "" },
+        review: { type: String, default: "" },
+      },
+    ],
   },
   { timestamps: true }
 );
+
 
 productSchema.pre("save", function () {
   if (this.isModified("productName")) {
@@ -74,6 +105,14 @@ productSchema.pre("save", function () {
       trim: true,
     });
   }
+
+  if (!this.seoTitle || this.seoTitle.trim().length === 0) {
+    this.seoTitle = this.productName;
+  }
 });
-export default mongoose.models.products ||
+
+const Product =
+  mongoose.models.products ||
   mongoose.model("products", productSchema);
+
+export default Product;

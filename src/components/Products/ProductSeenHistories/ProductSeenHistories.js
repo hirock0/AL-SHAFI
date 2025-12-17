@@ -9,8 +9,11 @@ import "swiper/css";
 import "swiper/css/navigation";
 import Link from "next/link";
 const ProductSeenHistories = () => {
-  const { activeFlag } = useSelector((state) => state);
+
+  const { activeFlag } = useSelector((state) => state?.slice);
   const [products, setProducts] = useState([]);
+
+
   useEffect(() => {
     const fetchViewedProducts = async () => {
       const slugsRes = localStorage.getItem("p_slug");
@@ -27,13 +30,20 @@ const ProductSeenHistories = () => {
       try {
         const responses = await Promise.all(
           slugs.map((slug) =>
-            axios.get(`/pages/api/products/product/findProducts/${slug}`)
+            axios.get(`/pages/api/products/product/findProducts/${slug}`, {
+              headers: { "x-request-source": "12Hirock@" },
+            })
           )
         );
-        const productsData = responses
-          .map((res) => res.data?.product)
-          .filter(Boolean);
-        setProducts(productsData);
+
+        if (!responses) {
+          return;
+        } else {
+          const productsData = responses
+            .map((res) => res.data?.product)
+            .filter(Boolean);
+          setProducts(productsData);
+        }
       } catch (err) {
         console.error("Failed to fetch products", err);
         setProducts([]);
@@ -52,8 +62,8 @@ const ProductSeenHistories = () => {
   }
 
   return (
-    <section className="my-8">
-      <h3 className="text-xl md:text-2xl font-semibold mb-4 border-b pb-2 text-gray-800">
+    <section className="my-10">
+      <h3 className="text-xl font-semibold mb-4 border-b border-border pb-2">
         Recently Viewed Products
       </h3>
 
@@ -70,20 +80,20 @@ const ProductSeenHistories = () => {
       >
         {products.map((prod) => (
           <SwiperSlide key={prod._id}>
-            <div className="bg-white shadow rounded-lg p-2 hover:shadow-lg transition cursor-pointer">
-              <Link href={`/product-details/${prod?.slug}`}>
+            <div className="bg-white shadow rounded md:rounded-md p-2 hover:shadow-xl transition cursor-pointer">
+              <Link href={`/product/product-details/${prod?.slug}`}>
                 <Image
                   src={prod.thumbnail.secure_url}
                   alt={prod.productName}
                   width={500}
                   height={500}
-                  className="w-full h-40 object-cover rounded-md"
+                  className="w-full h-40 object-cover rounded "
                 />
               </Link>
               <p className="text-sm font-medium mt-2 line-clamp-1">
                 {prod.productName}
               </p>
-              <p className="text-sm text-green-600 mt-1">৳{prod.offerPrice}</p>
+              <p className="text-sm text-text mt-1">৳{prod.offerPrice}</p>
             </div>
           </SwiperSlide>
         ))}
