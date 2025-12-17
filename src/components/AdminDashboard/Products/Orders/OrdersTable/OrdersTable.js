@@ -1,12 +1,12 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
-import BulkSelectBtn from "@/components/UI/Admin/Orders/BulkSelectBtn/BulkSelectBtn";
-import BulkDeleteBtn from "@/components/UI/Admin/Orders/BulkDeleteBtn/BulkDeleteBtn";
-import OrderSelectSteadFastBtn from "@/components/UI/Admin/Orders/SteadFast/OrderSelectSteadFastBtn/OrderSelectSteadFastBtn";
-import BulkSendToSteadFastBtn from "@/components/UI/Admin/Orders/SteadFast/BulkSendToSteadFastBtn/BulkSendToSteadFastBtn";
-import ViewOrderBtn from "@/components/UI/Admin/Orders/ViewOrderBtn/ViewOrderBtn";
+import BulkSelectBtn from "@/components/Ui/Admin/Orders/BulkSelectBtn/BulkSelectBtn";
+import BulkDeleteBtn from "@/components/Ui/Admin/Orders/BulkDeleteBtn/BulkDeleteBtn";
+import OrderSelectSteadFastBtn from "@/components/Ui/Admin/Orders/SteadFast/OrderSelectSteadFastBtn/OrderSelectSteadFastBtn";
+import BulkSendToSteadFastBtn from "@/components/Ui/Admin/Orders/SteadFast/BulkSendToSteadFastBtn/BulkSendToSteadFastBtn";
+import ViewOrderBtn from "@/components/Ui/Admin/Orders/ViewOrderBtn/ViewOrderBtn";
 import ViewPopup from "@/components/AdminDashboard/Order/ViewPopup/ViewPopup";
-import ConsignBtn from "@/components/UI/Admin/Orders/ConsignBtn/ConsignBtn";
+import ConsignBtn from "@/components/Ui/Admin/Orders/ConsignBtn/ConsignBtn";
 
 const OrdersTable = ({ orders, status }) => {
   if (!orders || orders.length === 0) {

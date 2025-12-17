@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
-import ApprovedBtn from "@/components/UI/Admin/Reviews/ApprovedBtn/ApprovedBtn";
-import ReviewDeleteBtn from "@/components/UI/Admin/Reviews/ReviewDeleteBtn/ReviewDeleteBtn";
+import ApprovedBtn from "@/components/Ui/Admin/Reviews/ApprovedBtn/ApprovedBtn";
+import ReviewDeleteBtn from "@/components/Ui/Admin/Reviews/ReviewDeleteBtn/ReviewDeleteBtn";
 import {
   Star,
   CheckCircle,

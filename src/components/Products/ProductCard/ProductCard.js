@@ -1,5 +1,5 @@
 "use client";
-import AddCartBtn from "@/components/UI/Products/AddCartBtn/AddCartBtn";
+import AddCartBtn from "@/components/Ui/Products/AddCartBtn/AddCartBtn";
 import { addActiveFlag } from "@/utils/redux/slices/slice";
 import Image from "next/image";
 import Link from "next/link";

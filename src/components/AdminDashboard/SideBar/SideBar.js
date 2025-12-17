@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Package,
   Layers,
-  Settings,
   LogOut,
   Home,
   ShoppingCart,

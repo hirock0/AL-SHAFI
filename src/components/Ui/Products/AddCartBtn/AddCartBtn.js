@@ -2,9 +2,6 @@
 import { useCart } from "@/hooks/carts/useCart";
 import { addActiveFlag, addCartFlag } from "@/utils/redux/slices/slice";
 import { useDispatch, useSelector } from "react-redux";
-
-
-
 const AddCartBtn = ({ product, styles, children }) => {
   const dispatch = useDispatch();
   const { activeFlag, cartFlag } = useSelector((state) => state?.slice);

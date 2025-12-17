@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import CategoryTable from "@/components/AdminDashboard/Products/Category/CategoryTable/CategoryTable";
-import CategoryAddBtn from "@/components/UI/Admin/Category/CategoryAddBtn/CategoryAddBtn.js";
+import CategoryAddBtn from "@/components/Ui/Admin/Category/CategoryAddBtn/CategoryAddBtn";
 import { AllCategories } from "@/actions/actions";
 
 const Categories = async () => {
