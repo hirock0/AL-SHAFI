@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
-import Product from "@/models/Products/Product/Product";
+import Product from "@/models/Products/Product";
 
 import { uploadToCloudinary } from "@/utils/cloudinary/cloudinary";
 
@@ -17,16 +17,18 @@ export async function POST(req) {
       imagesAlt = [],
       offerPrice,
       regularPrice,
+      volume = [],
       descriptions,
+      shortDescriptions,
       stock,
       status,
       shipping_fee,
+      frequentlyBoughtTogether,
       seoTitle,
       seoDescription,
       seoKeywords = [],
       seoImage,
     } = body;
-
 
     await dbConnect();
 
@@ -128,11 +130,13 @@ export async function POST(req) {
       images: filteredImages,
       offerPrice,
       regularPrice,
+      volume,
       descriptions,
+      shortDescriptions,
       stock,
       status,
       shipping_fee,
-
+      frequentlyBoughtTogether,
       // SEO
       seoTitle,
       seoDescription,
@@ -141,7 +145,6 @@ export async function POST(req) {
     });
 
     const savedProduct = await newProduct.save();
-
     return NextResponse.json({
       message: savedProduct
         ? "Product uploaded successfully"
@@ -150,7 +153,6 @@ export async function POST(req) {
       product: savedProduct || null,
     });
   } catch (error) {
-    console.error("Product POST error:", error);
     return NextResponse.json({
       message: error.message || "Something went wrong",
       success: false,

@@ -32,13 +32,18 @@ const menuItems = [
     icon: <Package size={20} />,
   },
   {
+    title: "Add Product",
+    href: "/admin-dashboard/add-product",
+    icon: <Package size={20} />,
+  },
+  {
     title: "Orders",
     href: "/admin-dashboard/orders/pending",
     icon: <ShoppingCart size={20} />,
   },
   {
     title: "Categories",
-    href: "/admin-dashboard/categories" ,
+    href: "/admin-dashboard/categories",
     icon: <Layers size={20} />,
   },
   {
@@ -81,7 +86,7 @@ const SideBar = () => {
                 width={110}
                 height={50}
                 priority
-                className="object-contain brightness-0 invert hover:scale-105 transition-transform duration-300"
+                className="object-contain hover:scale-105 transition-transform duration-300"
               />
             </Link>
           </div>

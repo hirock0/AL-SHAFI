@@ -3,8 +3,8 @@ import React, { useState, useMemo } from "react";
 import { Package, MapPin, Phone, Mail, User, ShoppingBag } from "lucide-react";
 import { useCart } from "@/hooks/carts/useCart";
 import Image from "next/image";
-import AreaSelections from "@/components/AreaSelections/AreaSelections";
-import Container from "@/components/Container/Container";
+import AreaSelections from "@/components/AreaSelections/AreaSelections.js";
+import Container from "@/components/Container/Container.js";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
@@ -32,7 +32,7 @@ const Checkout = () => {
     }, 0);
   }, [carts]);
 
-  const shippingTotal = subtotal > 0 ? 120 : 0; 
+  const shippingTotal = subtotal > 0 ? 120 : 0;
   const grandTotal = subtotal + shippingTotal;
   const [selectDta, setSelectDta] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("cod");
@@ -71,7 +71,10 @@ const Checkout = () => {
       totals: { subtotal, shippingTotal, grandTotal },
     };
 
-    const { data } = await axios.post("/pages/api/orders/create-order", payload);
+    const { data } = await axios.post(
+      "/pages/api/orders/create-order",
+      payload
+    );
 
     if (data?.success) {
       toast.success("Order created");
@@ -105,9 +108,7 @@ const Checkout = () => {
     <div className="py-8 md:py-12">
       <Container>
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Checkout
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-bold  mb-2">Checkout</h1>
           <p className="text-gray-600">
             Complete your order in a few simple steps
           </p>
@@ -118,7 +119,7 @@ const Checkout = () => {
           {/* LEFT SECTION - FORM */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded md:rounded-md shadow-sm p-8 border border-gray-100">
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Contact Info */}
                 <div>
                   <h2 className="text-lg font-semibold  mb-4 flex items-center gap-2">
@@ -128,7 +129,7 @@ const Checkout = () => {
                     Contact Information
                   </h2>
 
-                  <div className="space-y-4">
+                  <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 lg:space-x-4 ">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
                         Full Name <span className="text-red-500">*</span>
@@ -139,122 +140,66 @@ const Checkout = () => {
                         value={formData.fullName}
                         onChange={handleChange}
                         placeholder="John Doe"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                        className="input-field"
                         required
                       />
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Email{" "}
-                          <span className="text-gray-400 font-normal">
-                            (optional)
-                          </span>
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder="john@example.com"
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Phone Number <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="017xxxxxxxx"
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Address */}
-                <div>
-                  <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Building / House / Road *
+                        Email{" "}
+                        <span className="text-gray-400 font-normal">
+                          (optional)
+                        </span>
                       </label>
                       <input
-                        type="text"
-                        name="district"
-                        value={formData.district}
+                        type="email"
+                        name="email"
+                        value={formData.email}
                         onChange={handleChange}
-                        placeholder="District"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
-                        required
+                        placeholder="john@example.com"
+                        className="input-field"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                        Area / Locality / Landmark *
+                        Phone Number <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="017xxxxxxxx"
+                        className="input-field"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Address *
                       </label>
                       <input
                         type="text"
-                        name="city"
-                        value={formData.city}
+                        name="address"
+                        value={formData.address}
                         onChange={handleChange}
-                        placeholder="City / Thana"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition"
+                        placeholder="House no., Road no., Area..."
+                        className="input-field"
                         required
                       />
                     </div>
                   </div>
 
                   <AreaSelections setSelectDta={setSelectDta} />
-
-                  <div className="mt-4">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <div className="w-8 h-8 bg-primary/5 rounded-full flex items-center justify-center">
-                        <MapPin className="w-4 h-4 text-primary" />
-                      </div>
-                      Shipping Address
-                    </h2>
-
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="House no., Road no., Area..."
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition resize-none"
-                      rows={3}
-                      required
-                    />
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Delivery Notes{" "}
-                      <span className="text-gray-400 font-normal">
-                        (optional)
-                      </span>
-                    </label>
-                    <textarea
-                      name="note"
-                      value={formData.note}
-                      onChange={handleChange}
-                      placeholder="Delivery instructions or other notes"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition resize-none"
-                      rows={2}
-                    />
-                  </div>
                 </div>
+
+                {/* Address */}
 
                 <button
                   type="submit"
-                  className="w-full bg-primary hover:bg-primary-dark text-white py-2 md:py-4 rounded md:rounded-md font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-lighter"
+                  className="w-full bg-text hover:bg-black text-white py-3 font-semibold transition-all flex items-center justify-center gap-2 shadow-lg  mt-6"
                 >
                   <Package className="w-5 h-5" />
                   Place Order

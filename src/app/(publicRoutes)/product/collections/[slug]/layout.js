@@ -1,24 +1,25 @@
 export const dynamic = "force-dynamic";
-import Container from "@/components/Container/Container";
-import SideBar from "@/components/Products/Collections/SideBar/SideBar";
-import ProductSeenHistories from "@/components/Products/ProductSeenHistories/ProductSeenHistories";
+import Container from "@/components/Container/Container.js";
+import SideBar from "@/components/Products/Collections/SideBar/SideBar.js";
+import ProductSeenHistories from "@/components/Products/ProductSeenHistories/ProductSeenHistories.js";
 import { ChevronRight, Package } from "lucide-react";
 import Link from "next/link";
 
 const Layout = async ({ children, params }) => {
   const { slug } = await params;
+  // console.log(slug);
 
   const formatSlugName = (slug) => {
     return slug
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
-
 
   return (
     <div className="bg-background">
       <div className="bg-linear-to-r from-primary via-primary-dark to-primary relative overflow-hidden">
+        
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-20 w-64 h-64 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 right-20 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -32,11 +33,16 @@ const Layout = async ({ children, params }) => {
                 Home
               </Link>
               <ChevronRight className="w-4 h-4" />
-              <Link href="/product/collections/all-products" className="hover:text-white transition-colors">
+              <Link
+                href="/product/collections/all-products"
+                className="hover:text-white transition-colors"
+              >
                 Collections
               </Link>
               <ChevronRight className="w-4 h-4" />
-              <span className="text-white font-medium">{formatSlugName(slug)}</span>
+              <span className="text-white font-medium">
+                {formatSlugName(slug)}
+              </span>
             </div>
 
             {/* Title */}
@@ -77,9 +83,7 @@ const Layout = async ({ children, params }) => {
           {/* Main Content Area */}
           <main className="flex-1 min-w-0">
             {/* Product Content */}
-            <div className="mb-12">
-              {children}
-            </div>
+            <div className="mb-12">{children}</div>
 
             {/* Recently Viewed Section */}
             <div className="mt-12">

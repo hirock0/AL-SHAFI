@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Plus, Minus } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { addActiveFlag } from "@/utils/redux/slices/slice";
-import RemoveCart from "@/components/UI/Products/RemoveCart/RemoveCart";
+import RemoveCart from "@/components/Ui/Products/RemoveCart/RemoveCart";
 
 const QtyBtn = ({ prod }) => {
   const product = JSON.parse(prod);
@@ -58,59 +58,56 @@ const QtyBtn = ({ prod }) => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 w-full">
+    <div className="flex flex-row items-center  justify-between gap-2 w-full">
       {/* Price */}
-      <p className="font-bold text-text text-sm md:text-base lg:text-lg whitespace-nowrap">
-        ৳{(productPrice * quantity).toLocaleString()}
+      <p className=" text-text text-sm md:text-base lg:text-lg whitespace-nowrap">
+        TK {(productPrice * quantity).toLocaleString()}
       </p>
 
       {/* Qty Controls & Remove Button */}
-      <div className="flex items-center gap-3 w-full sm:w-auto">
+      <div className="flex items-center gap-2 w-full justify-end">
         {/* Quantity Controller */}
-        <div className="flex items-center rounded-xl border border-border bg-surface shadow-sm overflow-hidden">
+        <div className="flex items-center divide-x divide-gray-200 rounded border border-gray-300 shadow-sm">
           {/* Decrease */}
           <button
             onClick={handleDecrease}
             disabled={quantity <= 1}
             aria-label="Decrease quantity"
-            className="px-3 py-2 flex items-center justify-center
-        text-muted-foreground hover:text-primary
-        hover:bg-primary/10
-        active:scale-95
-        transition-all
-        disabled:opacity-40 disabled:cursor-not-allowed"
+            className=" px-1 md:px-1.5 py-0.5 flex items-center justify-center
+        text-gray-500 hover:text-red-600 hover:bg-red-50
+        transition-colors duration-150 rounded-l-md
+        disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <Minus className="w-4 h-4" strokeWidth={2.5} />
+            <Minus className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" strokeWidth={2.5} />
           </button>
 
-          {/* Quantity Input */}
-          <input
-            type="number"
-            value={quantity}
-            onChange={handleInputChange}
-            min="1"
-            max={maxQty}
-            aria-label="Quantity"
-            className="w-10 md:w-12 text-center text-sm font-semibold
-        bg-transparent text-foreground
-        border-x border-border
-        focus:outline-none focus:bg-primary/5
-        focus:ring-2 focus:ring-primary/30"
-          />
+          {/* Quantity Display */}
+          <div className="px-1 md:px-1.5 py-0.5 min-w-8 md:min-w-9">
+            <input
+              type="number"
+              value={quantity}
+              onChange={handleInputChange}
+              min="1"
+              max={maxQty}
+              aria-label="Quantity"
+              className="w-full text-center text-xs md:text-sm font-semibold text-gray-900
+          bg-transparent focus:outline-none focus:text-primary
+          [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none 
+          [&::-webkit-inner-spin-button]:appearance-none"
+            />
+          </div>
 
           {/* Increase */}
           <button
             onClick={handleIncrease}
             disabled={quantity >= maxQty}
             aria-label="Increase quantity"
-            className="px-3 py-2 flex items-center justify-center
-        text-muted-foreground hover:text-primary
-        hover:bg-primary/10
-        active:scale-95
-        transition-all
-        disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-1 md:px-1.5 py-0.5 flex items-center justify-center
+        text-gray-500 hover:text-green-600 hover:bg-green-50
+        transition-colors duration-150 rounded-r-md
+        disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <Plus className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" strokeWidth={2.5} />
           </button>
         </div>
 

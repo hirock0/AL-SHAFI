@@ -67,13 +67,13 @@ const Navbar = () => {
           }`}
         >
           <div className="py-4 bg-surface px-4">
-            <div className="flex items-center mx-auto px-4 py-2 max-w-md border border-border bg-background">
+            <div className="flex items-center mx-auto px-4 py-2 max-w-md bg-background border border-gray-300 rounded focus-within:ring-2 focus-within:ring-primary focus-within:border-transparent">
               <MagnifyingGlassIcon className="h-5 w-5 text-gray-500 mr-2" />
               <input
                 type="text"
                 placeholder="Search products..."
                 onChange={(e) => dispatch(addQuery(e.target.value))}
-                className="w-full outline-none text-sm "
+                className="w-full outline-none text-sm focus:outline-none"
               />
             </div>
 
@@ -93,7 +93,7 @@ const Navbar = () => {
                   e.stopPropagation();
                   dispatch(addSidebarFlag(!sidebarFlag));
                 }}
-                className="text-primary lg:hidden"
+                className="text-text hover:text-primary-dark lg:hidden"
               >
                 {sidebarFlag ? <X strokeWidth={2} /> : <Menu strokeWidth={2} />}
               </button>
@@ -107,32 +107,37 @@ const Navbar = () => {
                   priority
                 />
               </Link>
-
             </div>
 
-              <div className="space-x-6 max-lg:hidden mr-6 font-semibold ">
-                <Link href={"/"} className="hover:text-primary-dark">Home</Link>
-                <Link href={"/product/collections/all-products"} className="hover:text-primary-dark">Shop Now</Link>
-                <Link href={"/"} className="hover:text-primary-dark">About Us</Link>
-                <Link href={"/"} className="hover:text-primary-dark">Contact Us</Link>
-              
-              </div>
-
+            <div className="space-x-6 max-lg:hidden mr-6 font-semibold ">
+              <Link href={"/"} className="hover:text-primary-dark">
+                Home
+              </Link>
+              <Link
+                href={"/product/collections/all-products"}
+                className="hover:text-primary-dark"
+              >
+                Shop Now
+              </Link>
+              <Link href={"/"} className="hover:text-primary-dark">
+                About Us
+              </Link>
+              <Link href={"/"} className="hover:text-primary-dark">
+                Contact Us
+              </Link>
+            </div>
 
             {/* icons  */}
             <div className="flex items-center justify-end space-x-3">
-      
-
-
               <button
                 onClick={() => setShowSearch((prev) => !prev)}
-                className="text-text rounded-full  hover:scale-105 transition-transform duration-300 ease-in-out"
+                className="text-text hover:text-primary-dark"
               >
                 <Search strokeWidth={2} />
               </button>
               <Link
                 href={user ? "/account/profile" : "/login"}
-                className="text-text rounded-full max-lg:hidden hover:scale-105 transition-transform duration-300 ease-in-out"
+                className="text-text max-lg:hidden  hover:text-primary-dark"
               >
                 {user ? (
                   <UserRound strokeWidth={2} />
@@ -142,7 +147,7 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={() => dispatch(addCartFlag(!cartFlag))}
-                className="relative text-text hover:scale-105 transition-transform duration-300 ease-in-out"
+                className="relative text-text  hover:text-primary-dark"
               >
                 <ShoppingCart strokeWidth={2} />
                 <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">

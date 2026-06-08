@@ -10,20 +10,29 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { addCartFlag } from "@/utils/redux/slices/slice";
 import { useCart } from "@/hooks/carts/useCart";
-import QtyBtn from "@/components/UI/Products/QtyBtn/QtyBtn";
+import QtyBtn from "@/components/Ui/Products/QtyBtn/QtyBtn";
 import Link from "next/link";
+import useProductsBySlug from "@/hooks/products/productBySlug/useProductsBySlug";
+import AddCartBtn from "@/components/Ui/Products/AddCartBtn/AddCartBtn";
+import useShippingRange from "@/hooks/shippingRange/useShippingRange";
 
 const CartSidebar = () => {
   const dispatch = useDispatch();
-  const { cartFlag } = useSelector((state) => state.slice);
+  const { cartFlag, commonData, commonFlag } = useSelector(
+    (state) => state.slice
+  );
+  const { shippingRangeNumber } = useShippingRange();
   const { carts } = useCart();
+  const slugs = carts?.map((s) => s?.slug);
+  const finalSlugs =
+    commonFlag === "add_slug"
+      ? Array.from(new Set([commonData, ...slugs]))
+      : slugs?.filter((sl) => sl !== commonData);
 
+  const { slugProducts } = useProductsBySlug(finalSlugs);
   const isOpen = cartFlag;
   const closeCart = () => dispatch(addCartFlag(false));
-
-  // Subtotal
   const subtotal = carts.reduce((sum, item) => sum + item.price * item.qty, 0);
-
   return (
     <>
       {/* Backdrop */}
@@ -36,7 +45,7 @@ const CartSidebar = () => {
 
       {/* Sidebar - 70% width on mobile, max 480px on desktop */}
       <aside
-        className={`fixed top-0 right-0 bottom-0 w-[70%] sm:w-[60%] md:max-w-md lg:max-w-lg bg-surface shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 bottom-0 w-[80%] sm:w-[80%] md:max-w-md lg:max-w-lg bg-surface shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -67,9 +76,18 @@ const CartSidebar = () => {
               <X className="w-4 h-4 md:w-5 md:h-5" strokeWidth={2.5} />
             </button>
           </div>
+          <div className=" text-center">
+            {subtotal > 0 ? (
+              subtotal > shippingRangeNumber ? (
+                "You have achieved Free Shipping."
+              ) : (
+                <p>Add TK {shippingRangeNumber} more for free shipping!</p>
+              )
+            ) : null}
+          </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-background">
+          <div className="flex-1 p-3 md:p-6 overflow-y-auto">
             {/* Empty Cart */}
             {carts.length === 0 && (
               <div className="text-center py-12 md:py-20">
@@ -95,63 +113,114 @@ const CartSidebar = () => {
                 </Link>
               </div>
             )}
+            <div className="overflow-y-auto space-y-3 md:space-y-4 bg-background">
+              {/* Cart List */}
+              {carts.length > 0 &&
+                carts.map((cart, idx) => (
+                  <div
+                    key={idx}
+                    className="flex gap-2 md:gap-4 bg-surface p-3 md:p-4 rounded-md md:rounded-lg border border-border hover:shadow-md hover:border-primary/30 transition-all duration-200 group"
+                  >
+                    {/* Image */}
+                    <div className="shrink-0">
+                      {cart?.img ? (
+                        <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-md md:rounded-lg overflow-hidden bg-background border border-border group-hover:border-primary/30 transition-colors">
+                          <Image
+                            src={cart.img}
+                            alt={cart?.productName || "Product image"}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg md:rounded-xl bg-background border-2 border-dashed border-border flex items-center justify-center">
+                          <Package
+                            className="w-6 h-6 md:w-8 md:h-8 text-text-muted"
+                            strokeWidth={1.5}
+                          />
+                        </div>
+                      )}
+                    </div>
 
-            {/* Cart List */}
-            {carts.length > 0 &&
-              carts.map((cart, idx) => (
-                <div
-                  key={idx}
-                  className="flex gap-2 md:gap-4 bg-surface p-3 md:p-4 rounded-lg md:rounded-xl border border-border hover:shadow-md hover:border-primary/30 transition-all duration-200 group"
-                >
-                  {/* Image */}
-                  <div className="shrink-0">
-                    {cart?.img ? (
-                      <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-lg md:rounded-xl overflow-hidden bg-background border border-border group-hover:border-primary/30 transition-colors">
-                        <Image
-                          src={cart.img}
-                          alt={cart?.productName || "Product image"}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        href={`/product/product-details/${cart.slug}`}
+                        onClick={closeCart}
+                        className="block"
+                      >
+                        <h3 className="text-text line-clamp-2 transition-colors text-xs md:text-sm lg:text-base mb-1">
+                          {cart.productName}
+                        </h3>
+                      </Link>
+
+                      {/* <p className="text-[10px] md:text-xs text-text-secondary capitalize mb-2">
+                        {cart.category}
+                      </p> */}
+
+                      <div className="w-full mt-2">
+                        {/* Qty Button */}
+                        <QtyBtn prod={JSON.stringify(cart)} />
                       </div>
-                    ) : (
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-lg md:rounded-xl bg-background border-2 border-dashed border-border flex items-center justify-center">
-                        <Package
-                          className="w-6 h-6 md:w-8 md:h-8 text-text-muted"
-                          strokeWidth={1.5}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      href={`/product/product-details/${cart.slug}`}
-                      onClick={closeCart}
-                      className="block"
-                    >
-                      <h3 className="font-semibold text-text line-clamp-2 transition-colors text-xs md:text-sm lg:text-base mb-1">
-                        {cart.productName}
-                      </h3>
-                    </Link>
-
-                    <p className="text-[10px] md:text-xs text-text-secondary capitalize mb-2">
-                      {cart.category}
-                    </p>
-
-                    <div className="w-full">
-                      {/* Qty Button */}
-                      <QtyBtn prod={JSON.stringify(cart)} />
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              {/* ---------------- */}
+            </div>
+            <div className=" mt-6">
+              {slugProducts?.length > 0 && (
+                <h3 className=" text-base text-start">
+                  Frequently Bought Together
+                </h3>
+              )}
+              <div className=" mt-2 space-y-3">
+                {slugProducts?.map((p, i) => {
+                  return (
+                    <div
+                      className="p-5 space-y-2 border rounded-md shadow border-border hover:shadow-lg transition-all duration-200"
+                      key={i}
+                    >
+                      <div className=" flex justify-start items-center space-x-2 ">
+                        <Image
+                          src={p?.thumbnail?.secure_url}
+                          alt={p?.slug}
+                          width={500}
+                          height={500}
+                          className=" h-20 w-20"
+                        />
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm md:text-base">
+                            {p?.productName}
+                          </p>
+                          <p className="text-sm md:text-base">
+                            TK {p?.offerPrice}{" "}
+                          </p>
+
+                          <AddCartBtn
+                            product={JSON.stringify(p)}
+                            styles="w-fit px-2 py-1 md:px-3 md:py-1.5  bg-text text-white hover:bg-black transition-all duration-300 font-medium text-sm md:text-base shadow-md hover:shadow-lg flex items-center justify-center gap-2 group/btn"
+                            frbFlag={"cart_frb"}
+                          >
+                            <ShoppingCart
+                              className=" w-3 h-3 md:w-4 md:h-4 group-hover/btn:scale-110 transition-transform"
+                              strokeWidth={2}
+                            />
+                            <span className="text-xs md:text-sm">
+                              Add to Cart
+                            </span>
+                          </AddCartBtn>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Footer */}
           {carts.length > 0 && (
-            <div className="border-t border-border p-4 md:p-6 bg-surface">
+            <div className=" p-4 md:p-6 bg-surface">
               {/* Subtotal */}
               <div className="bg-linear-to-br from-primary/5 to-accent/5 rounded-lg md:rounded-xl p-3 md:p-4 mb-3 md:mb-4 border border-primary/20">
                 <div className="flex justify-between items-baseline">
@@ -159,7 +228,7 @@ const CartSidebar = () => {
                     Subtotal
                   </span>
                   <span className="text-lg md:text-xl lg:text-2xl font-bold text-text">
-                    ৳{subtotal.toLocaleString()}
+                    TK{subtotal.toLocaleString()}
                   </span>
                 </div>
                 <p className="text-[10px] md:text-xs text-text-secondary mt-1 md:mt-2">
@@ -171,7 +240,7 @@ const CartSidebar = () => {
               <Link
                 href="/product/checkout"
                 onClick={closeCart}
-                className="block w-full bg-primary text-white text-center py-3 md:py-4 rounded md:rounded-md font-semibold hover:bg-primary-dark hover:to-primary transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] mb-2 md:mb-3 group text-sm md:text-base"
+                className="block w-full bg-text text-white text-center py-3 md:py-4 font-semibold hover:bg-black hover:to-primary transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] mb-2 md:mb-3 group text-sm md:text-base"
               >
                 <span className="flex items-center justify-center gap-2">
                   Proceed to Checkout
@@ -192,10 +261,10 @@ const CartSidebar = () => {
               </Link>
 
               {/* Trust Badge */}
-              <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border flex items-center justify-center gap-2 text-[10px] md:text-xs text-text-secondary">
+              {/* <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border flex items-center justify-center gap-2 text-[10px] md:text-xs text-text-secondary">
                 <div className="w-1 h-1 rounded-full bg-success"></div>
                 <span>Secure checkout guaranteed</span>
-              </div>
+              </div> */}
             </div>
           )}
         </div>

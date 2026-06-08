@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import Image from "next/image";
 
@@ -70,12 +69,12 @@ const GalleryImages = ({ product }) => {
       <div className="relative group">
         <div
           className="relative w-fit rounded-md overflow-hidden shadow-lg"
-          onMouseMove={handleMouseMove}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          // onMouseMove={handleMouseMove}
+          // onMouseEnter={handleMouseEnter}
+          // onMouseLeave={handleMouseLeave}
         >
           {/* Zoom View */}
-          <div
+          {/* <div
             className={`absolute inset-0 transition-opacity duration-300 ${
               isZoomed ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
@@ -85,7 +84,7 @@ const GalleryImages = ({ product }) => {
               backgroundPosition: backgroundPos,
               backgroundRepeat: "no-repeat",
             }}
-          />
+          /> */}
 
           {/* Normal View */}
           <Image
@@ -100,20 +99,20 @@ const GalleryImages = ({ product }) => {
           />
 
           {/* Zoom Indicator */}
-          <div
+          {/* <div
             className={`absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium text-gray-700 shadow-md transition-opacity duration-300 ${
               isZoomed ? "opacity-0" : "opacity-100"
             }`}
           >
             🔍 Hover to zoom
-          </div>
+          </div> */}
 
           {/* Navigation Arrows */}
           {allImages.length > 1 && (
             <>
               <button
                 onClick={handlePrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                className="absolute left-4 top-1/2 -translate-y-1/2 backdrop-blur-sm bg-background p-3 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
                 aria-label="Previous image"
               >
                 <svg
@@ -133,7 +132,7 @@ const GalleryImages = ({ product }) => {
 
               <button
                 onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white p-3 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-background backdrop-blur-sm  p-3 rounded-full shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
                 aria-label="Next image"
               >
                 <svg
@@ -171,7 +170,7 @@ const GalleryImages = ({ product }) => {
               onClick={() => handleThumbnailClick(img, idx)}
               className={`relative aspect-square rounded-md overflow-hidden transition-all duration-200 ${
                 selectedIndex === idx
-                  ? "ring-2 ring-blue-500 ring-offset-2 shadow-lg scale-105"
+                  ? "ring-2 ring-primary ring-offset-2 shadow-lg scale-105"
                   : "ring-1 ring-gray-200 hover:ring-gray-300 hover:scale-105 shadow-sm"
               }`}
             >

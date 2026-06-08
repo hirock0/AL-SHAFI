@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect/dbConnect";
 import { NextResponse } from "next/server";
 import * as jose from "jose";
-import User from "@/models/User/User";
+import User from "@/models/User.js";
 import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET;

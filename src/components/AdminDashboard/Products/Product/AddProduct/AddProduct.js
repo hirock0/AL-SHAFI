@@ -6,18 +6,28 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import RichTextEditor from "@/components/RichTextEditor/RichTextEditor";
-import { X } from "lucide-react";
-
-const AddProduct = ({ setAddFlag }) => {
+import useProducts from "@/hooks/products/allProducts/useProducts";
+const AddProduct = () => {
+  const { products } = useProducts();
   const router = useRouter();
-
+  const [frBhtTogether, setFrBhtTogether] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [thumbnailType, setThumbnailType] = useState("upload");
   const [categories, setCategories] = useState([]);
+  const [query, setQuery] = useState("");
+  const [productSlug, setProductSlug] = useState("");
+  const [productSlugs, setProductSlugs] = useState([]);
+  const [loader, setLoader] = useState(false);
 
-  // -------------------------------
-  // React Hook Form Initial Setup
-  // -------------------------------
+  const filterProducts = products?.filter((pr) => {
+    const searchProducts =
+      pr.productName.toLowerCase().includes(query.toLowerCase()) ||
+      pr.slug.toLowerCase().includes(query.toLowerCase());
+    if (searchProducts) {
+      return pr;
+    }
+  });
+
   const {
     register,
     handleSubmit,
@@ -35,10 +45,13 @@ const AddProduct = ({ setAddFlag }) => {
       images: [{ value: "", alt: "", type: "upload", preview: null }],
       offerPrice: "",
       regularPrice: "",
+      volume: [{ load: 0, price: 0 }],
       descriptions: "",
+      shortDescriptions: "",
       stock: "",
       status: "regular",
       shipping_fee: "free",
+      frequentlyBoughtTogether: [],
       seoTitle: "",
       seoDescription: "",
       seoKeywords: "",
@@ -46,24 +59,28 @@ const AddProduct = ({ setAddFlag }) => {
     },
   });
 
-  // Dynamic image fields
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "images",
   });
+  const {
+    fields: volumeFields,
+    append: appendVolume,
+    remove: removeVolume,
+  } = useFieldArray({
+    control,
+    name: "volume",
+  });
 
   const descriptions = watch("descriptions");
-  const images = watch("images");
-  const thumbnail = watch("thumbnail");
+  const shortDescriptions = watch("shortDescriptions");
 
   // -------------------------------
   // Load Categories
   // -------------------------------
   useEffect(() => {
     axios
-      .get("/pages/api/products/category", {
-        headers: { "x-request-source": "12Hirock@" },
-      })
+      .get("/pages/api/products/category")
       .then((res) => {
         if (res.data.success) {
           setCategories(res.data.categories.filter((c) => c.status));
@@ -117,7 +134,8 @@ const AddProduct = ({ setAddFlag }) => {
   // Submit
   // -------------------------------
   const onSubmit = async (data) => {
-    if (!data.descriptions.trim()) {
+    setLoader(true);
+    if (!data.descriptions.trim() || !data.shortDescriptions.trim()) {
       toast.error("Description is required");
       return;
     }
@@ -130,8 +148,8 @@ const AddProduct = ({ setAddFlag }) => {
         ?.split(",")
         .map((k) => k.trim())
         .filter((k) => k.length > 0),
+      frequentlyBoughtTogether: productSlugs,
     };
-
     try {
       const res = await axios.post("/pages/api/products/product", payload);
       if (res.data.success) {
@@ -139,14 +157,28 @@ const AddProduct = ({ setAddFlag }) => {
         router.refresh();
         reset();
         setThumbnailPreview(null);
+        setLoader(false);
       }
     } catch (err) {
       toast.error(err.message || "Something went wrong!");
+    } finally {
+      setLoader(false);
     }
   };
 
+  useEffect(() => {
+    const handler = () => {
+      if (productSlug !== "") {
+        setProductSlugs([productSlug, ...productSlugs]);
+      } else {
+        return setProductSlugs([]);
+      }
+    };
+    handler();
+  }, [productSlug]);
+
   return (
-    <div className="relative max-w-6xl mx-auto p-8 bg-white rounded-md shadow-xl border border-gray-100">
+    <div className="relative max-w-7xl mx-auto p-8 bg-white rounded-md shadow-xl border border-gray-100">
       {/* Header */}
       <div className="text-center mb-4">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -156,19 +188,8 @@ const AddProduct = ({ setAddFlag }) => {
           Fill in the details to add a new product to your store
         </p>
       </div>
-
-      {/* Cancel Button */}
-      <div className=" absolute right-5 top-5">
-        <button
-          onClick={() => setAddFlag(false)}
-          className="p-2 text-sm font-medium text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full transition-colors"
-        >
-          <X />
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-8 max-h-[50vh] overflow-y-scroll">
+        <div className="space-y-8  overflow-y-scroll">
           {/* Basic Information Card */}
           <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-6 pb-3 border-b border-gray-200">
@@ -184,7 +205,7 @@ const AddProduct = ({ setAddFlag }) => {
                 <input
                   {...register("productName", { required: true })}
                   placeholder="Enter product name"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 />
                 {errors.productName && (
                   <p className="mt-2 text-sm text-red-600">
@@ -200,7 +221,7 @@ const AddProduct = ({ setAddFlag }) => {
                 </label>
                 <select
                   {...register("category", { required: true })}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 >
                   <option value="">Select Category</option>
                   {categories.map((cat) => (
@@ -297,7 +318,7 @@ const AddProduct = ({ setAddFlag }) => {
                   {...register("thumbnail")}
                   placeholder="https://example.com/image.jpg"
                   onChange={(e) => setThumbnailPreview(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 />
               )}
 
@@ -305,7 +326,7 @@ const AddProduct = ({ setAddFlag }) => {
               <input
                 {...register("thumbnailAlt")}
                 placeholder="Thumbnail alt text (for SEO)"
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="input-field"
               />
 
               {/* Preview */}
@@ -525,10 +546,83 @@ const AddProduct = ({ setAddFlag }) => {
                   {...register("stock", { required: true })}
                   type="number"
                   placeholder="0"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 />
               </div>
             </div>
+    
+
+            {/* Volume Pricing */}
+            <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                Volume Pricing
+              </h3>
+
+              <div className="space-y-4">
+                {volumeFields.map((field, i) => (
+                  <div
+                    key={field.id}
+                    className="flex gap-4 items-center bg-white "
+                  >
+                    {/* Load */}
+                    <div className="">
+                      <h3>Load</h3>
+
+                      <input
+                        {...register(`volume.${i}.load`, { required: true })}
+                        type="text"
+                        placeholder="Load (e.g. 1kg, 500ml)"
+                        className=" pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+
+                    {/* Price */}
+                    <div className="">
+                      <h3>Price</h3>
+
+                      <input
+                        {...register(`volume.${i}.price`, { required: true })}
+                        type="number"
+                        placeholder="Price"
+                        className=" pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    {/* Remove */}
+                    {volumeFields.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeVolume(i)}
+                        className="text-red-600 font-medium"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {/* Add Volume */}
+                <button
+                  type="button"
+                  onClick={() => appendVolume({ load: "", price: "" })}
+                  className=""
+                >
+                  + Add Volume
+                </button>
+              </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+            
           </div>
 
           {/* Description Card */}
@@ -540,6 +634,19 @@ const AddProduct = ({ setAddFlag }) => {
               <RichTextEditor
                 value={descriptions}
                 onChange={(v) => setValue("descriptions", v)}
+              />
+            </div>
+          </div>
+          {/* short descriptions*/}
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Short Description
+            </h3>
+            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+              <RichTextEditor
+                value={shortDescriptions}
+                onChange={(v) => setValue("shortDescriptions", v)}
+                placeholder={"Write your short descriptions.."}
               />
             </div>
           </div>
@@ -556,10 +663,7 @@ const AddProduct = ({ setAddFlag }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Status
                 </label>
-                <select
-                  {...register("status")}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                >
+                <select {...register("status")} className="input-field">
                   <option value="regular">Regular</option>
                   <option value="onSale">On Sale</option>
                   <option value="new">New</option>
@@ -572,13 +676,60 @@ const AddProduct = ({ setAddFlag }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Shipping
                 </label>
-                <select
-                  {...register("shipping_fee")}
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                >
+                <select {...register("shipping_fee")} className="input-field">
                   <option value="free">Free Shipping</option>
                   <option value="paid">Paid Shipping</option>
                 </select>
+              </div>
+            </div>
+            <div className=" mt-5 relative">
+              <div className=" flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setFrBhtTogether(!frBhtTogether)}
+                  className="bg-red-600 hover:bg-red-700 active:bg-red-800 text-white p-2 rounded-md"
+                >
+                  Add Frequently Bought Together
+                </button>
+                {frBhtTogether && (
+                  <input
+                    type="text"
+                    placeholder="Search Products..."
+                    onChange={(e) => setQuery(e.target.value)}
+                    className=" border border-slate-300 px-2 py-2 rounded-md outline-0"
+                  />
+                )}
+              </div>
+              <div className=" ">
+                <div
+                  className={`${
+                    !frBhtTogether ? "hidden" : "block"
+                  }  space-y-2 absolute right-0 left-0 bg-white h-[50vh] overflow-y-auto py-5`}
+                >
+                  {filterProducts?.length === 0 ? (
+                    <div className=" text-center">There are no products!</div>
+                  ) : (
+                    filterProducts?.map((product, idx) => (
+                      <div
+                        key={idx}
+                        className=" flex items-center justify-between gap-3 border border-slate-300 shadow py-2 px-5 rounded-md"
+                      >
+                        <Image
+                          src={product?.thumbnail?.secure_url}
+                          alt={product?.slug}
+                          width={500}
+                          height={500}
+                          className="h-20 w-20"
+                        />
+                        {product?.productName}
+                        <input
+                          type="checkbox"
+                          onClick={() => setProductSlug(product?.slug)}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -597,7 +748,7 @@ const AddProduct = ({ setAddFlag }) => {
                 <input
                   {...register("seoTitle")}
                   placeholder="Optimized title for search engines"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 />
               </div>
 
@@ -609,7 +760,7 @@ const AddProduct = ({ setAddFlag }) => {
                   {...register("seoDescription")}
                   rows={3}
                   placeholder="Brief description for search results"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                  className="input-field resize-none"
                 />
               </div>
 
@@ -620,7 +771,7 @@ const AddProduct = ({ setAddFlag }) => {
                 <input
                   {...register("seoKeywords")}
                   placeholder="keyword1, keyword2, keyword3"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 />
               </div>
 
@@ -631,7 +782,7 @@ const AddProduct = ({ setAddFlag }) => {
                 <input
                   {...register("seoImage")}
                   placeholder="https://example.com/seo-image.jpg"
-                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  className="input-field"
                 />
               </div>
             </div>
@@ -644,7 +795,7 @@ const AddProduct = ({ setAddFlag }) => {
             type="submit"
             className="w-full py-4 bg-primary  text-background font-semibold  hover:bg-primary-dark  transition-all shadow-lg"
           >
-            Add Product
+            {!loader ? " Add Product" : " Adding..."}
           </button>
         </div>
       </form>

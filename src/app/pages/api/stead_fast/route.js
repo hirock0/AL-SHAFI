@@ -1,8 +1,8 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
-import Order from "@/models/Order/Order";
-import Product from "@/models/Products/Product/Product";
+import Order from "@/models/Order.js";
+import Product from "@/models/Products/Product.js";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 function randomSuffix(len = 6) {

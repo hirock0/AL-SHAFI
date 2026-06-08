@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
-import Banner from "@/models/Banner/Banner";
+import Banner from "@/models/Banner.js";
 import { uploadToCloudinary } from "@/utils/cloudinary/cloudinary";
 export async function POST(req) {
   try {

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { AuthUser } from "@/actions/actions";
-import LogoutBtn from "@/components/UI/User/LogoutBtn/LogoutBtn";
+import LogoutBtn from "@/components/Ui/User/LogoutBtn/LogoutBtn.js";
 import { FolderClock } from "lucide-react";
 import Link from "next/link";
 

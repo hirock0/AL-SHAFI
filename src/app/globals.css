@@ -7,37 +7,40 @@
   --text: #1a1a1a;
   --text-secondary: #505760;
   --text-muted: #6a6e74;
-  
+
   /* Brand Colors - Fresh & Natural */
   --primary: #7ea33e;
   --primary-dark: #486926;
   --primary-light: #a3c746;
   --primary-lighter: #d4e5b8;
-  
+
   /* Accent Colors */
   --accent-orange: #f6ad55;
   --accent-brown: #8b6b47;
   --accent-cream: #f7f3e9;
-  
+
   /* Semantic Colors */
   --success: #68d391;
   --warning: #fbd38d;
   --error: #fc8181;
   --info: #63b3ed;
-  
+
   /* Shadows & Elevation */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.03);
-  
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08),
+    0 10px 10px -5px rgba(0, 0, 0, 0.03);
+
   /* Borders */
   --border-color: #eeeeee;
   --border-radius-sm: 6px;
   --border-radius-md: 10px;
   --border-radius-lg: 16px;
   --border-radius-xl: 24px;
-  
+
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -77,7 +80,6 @@ body {
   line-height: 1.6;
 }
 
-
 /* Button Base Styles */
 button {
   @apply cursor-pointer;
@@ -92,8 +94,6 @@ button {
   width: 100%;
 } */
 
-
-
 /* Badge/Tag Styles */
 .badge {
   display: inline-block;
@@ -107,4 +107,11 @@ button {
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+@layer components {
+  .input-field {
+    @apply w-full border border-border rounded px-3 py-2 text-sm focus:outline-none
+              focus:ring-2 focus:ring-primary;
+  }
 }

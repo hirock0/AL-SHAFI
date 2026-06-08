@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect/dbConnect";
 import { NextResponse } from "next/server";
-import UserOrder from "@/models/Order/UserOrder";
+import UserOrder from "@/models/UserOrder.js";
 export async function POST(req) {
   try {
     await dbConnect();

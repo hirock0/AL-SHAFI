@@ -132,7 +132,7 @@ const Footer = () => {
                   width={140}
                   height={50}
                   priority
-                  className="object-contain brightness-0 invert hover:scale-105 transition-transform duration-300"
+                  className="object-contain transition-transform duration-300"
                 />
               </Link>
             </div>

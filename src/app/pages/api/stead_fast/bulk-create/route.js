@@ -1,4 +1,4 @@
-import UserOrder from "@/models/Order/UserOrder";
+import UserOrder from "@/models/UserOrder.js";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
 

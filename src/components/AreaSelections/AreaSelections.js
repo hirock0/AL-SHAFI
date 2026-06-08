@@ -107,7 +107,7 @@ const AreaSelections = ({ setSelectDta }) => {
         <select
           value={selectedDivision}
           onChange={(e) => setSelectedDivision(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white"
+          className="input-field"
         >
           <option value="">Select Division</option>
           {divisions.map((div) => (
@@ -126,7 +126,7 @@ const AreaSelections = ({ setSelectDta }) => {
         <select
           value={selectedDistrict}
           onChange={(e) => setSelectedDistrict(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+          className="input-field"
           disabled={!districts.length}
         >
           <option value="">Select District</option>
@@ -146,7 +146,7 @@ const AreaSelections = ({ setSelectDta }) => {
         <select
           value={selectedUpazila}
           onChange={(e) => setSelectedUpazila(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+          className="input-field"
           disabled={!upazilas.length}
         >
           <option value="">Select Upazila</option>

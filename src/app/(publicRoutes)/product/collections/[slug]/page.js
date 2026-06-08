@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 import { CategoryWiseProducts } from "@/actions/actions";
-import FilterProducts from "@/components/AdminDashboard/Products/FilterProducts/FilterProducts";
-import ProductCard from "@/components/Products/ProductCard/ProductCard";
+import FilterProducts from "@/components/AdminDashboard/Products/FilterProducts/FilterProducts.js";
+import ProductCard from "@/components/Products/ProductCard/ProductCard.js";
 const Collections = async (params) => {
   const { grids } = await params?.searchParams;
   const { slug } = await params?.params;
@@ -15,10 +15,10 @@ const Collections = async (params) => {
   }
   return (
     <div className="">
-      <h1 className="text-2xl max-lg:hidden font-bold mb-6 uppercase font-montserrat">
+      {/* <h1 className="text-2xl max-lg:hidden font-bold mb-6 uppercase font-montserrat">
         {slug} Products
-      </h1>
-      <div className=" ">
+      </h1> */}
+      <div className=" pb-4  ">
         <FilterProducts slug={slug} />
       </div>
       <div
@@ -26,7 +26,7 @@ const Collections = async (params) => {
           ${
             grids
               ? `grid grid-cols-${grids}`
-              : "grid grid-cols-3 max-md:grid-cols-2"
+              : "grid grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-1"
           } gap-6
         `}
       >

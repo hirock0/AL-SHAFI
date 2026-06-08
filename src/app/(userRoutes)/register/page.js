@@ -9,7 +9,6 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addActiveFlag } from "@/utils/redux/slices/slice";
 import { useRouter } from "next/navigation";
-
 const Register = () => {
   const dispatch = useDispatch();
   const { activeFlag } = useSelector((state) => state?.slice);

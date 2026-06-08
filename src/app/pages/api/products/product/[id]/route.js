@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
-import Product from "@/models/Products/Product/Product";
+import Product from "@/models/Products/Product.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -9,7 +9,6 @@ import {
 export async function PATCH(req, { params }) {
   try {
     const { id } = await params;
-
     const {
       productName,
       category,
@@ -19,12 +18,13 @@ export async function PATCH(req, { params }) {
       imagesAlt = [],
       offerPrice,
       regularPrice,
+      volume = [],
       descriptions,
+      shortDescriptions,
       stock,
       status,
       shipping_fee,
-
-      // SEO fields
+      frequentlyBoughtTogether,
       seoTitle,
       seoDescription,
       seoKeywords,
@@ -40,10 +40,6 @@ export async function PATCH(req, { params }) {
         success: false,
       });
     }
-
-    // -----------------------------
-    // THUMBNAIL
-    // -----------------------------
     const thumbAltText =
       thumbnailAlt ||
       productName ||
@@ -86,9 +82,6 @@ export async function PATCH(req, { params }) {
       };
     }
 
-    // -----------------------------
-    // IMAGES
-    // -----------------------------
     const finalImages = [];
     const existingMap = {};
 
@@ -140,7 +133,6 @@ export async function PATCH(req, { params }) {
       }
     }
 
-    // delete unused old images
     for (const url in existingMap) {
       const img = existingMap[url];
       if (img.public_id && img.public_id !== "external") {
@@ -148,9 +140,6 @@ export async function PATCH(req, { params }) {
       }
     }
 
-    // -----------------------------
-    // UPDATE FIELDS
-    // -----------------------------
     existing.productName = productName || existing.productName;
     existing.category = category || existing.category;
     existing.thumbnail = finalThumbnail;
@@ -158,11 +147,14 @@ export async function PATCH(req, { params }) {
     existing.offerPrice = offerPrice ?? existing.offerPrice;
     existing.regularPrice = regularPrice ?? existing.regularPrice;
     existing.descriptions = descriptions || existing.descriptions;
+    existing.shortDescriptions =
+      shortDescriptions || existing.shortDescriptions;
     existing.stock = typeof stock === "number" ? stock : existing.stock;
     existing.status = status || existing.status;
     existing.shipping_fee = shipping_fee || existing.shipping_fee;
+    existing.frequentlyBoughtTogether = frequentlyBoughtTogether || [];
+    existing.volume = volume || [];
 
-    // SEO fields
     if (seoTitle !== undefined) existing.seoTitle = seoTitle;
     if (seoDescription !== undefined) existing.seoDescription = seoDescription;
     if (seoKeywords !== undefined)
@@ -198,7 +190,10 @@ export async function DELETE(_req, { params }) {
     }
 
     // delete thumbnail
-    if (existing.thumbnail?.public_id && existing.thumbnail.public_id !== "external") {
+    if (
+      existing.thumbnail?.public_id &&
+      existing.thumbnail.public_id !== "external"
+    ) {
       await deleteFromCloudinary(existing.thumbnail.public_id);
     }
 

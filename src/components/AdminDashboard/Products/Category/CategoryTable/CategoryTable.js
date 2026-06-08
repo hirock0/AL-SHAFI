@@ -1,6 +1,5 @@
 import CatEditNDelBtn from "@/components/Ui/Admin/Category/CatEditNDelBtn";
 import Image from "next/image";
-
 const CategoryTable = ({ categories }) => {
   const parseCategories = JSON.parse(categories);
   return (
@@ -81,5 +80,4 @@ const CategoryTable = ({ categories }) => {
     </div>
   );
 };
-
 export default CategoryTable;

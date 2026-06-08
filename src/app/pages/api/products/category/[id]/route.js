@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
-import Category from "@/models/Products/Category/Category.js";
+import Category from "@/models/Products/Category";
 
 
 import {

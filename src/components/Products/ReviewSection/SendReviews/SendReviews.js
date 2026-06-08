@@ -1,4 +1,5 @@
 "use client";
+
 import axios from "axios";
 import { Star } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -6,6 +7,8 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { addActiveFlag } from "@/utils/redux/slices/slice";
+
+
 const SendReviews = ({ product }) => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -63,7 +66,7 @@ const SendReviews = ({ product }) => {
     }
   };
   return (
-    <div className="mt-10 border-t border-border pt-6">
+    <div id="reviews" className="mt-10 border-t border-border pt-6">
       <h2 className="text-xl font-semibold mb-4">
         Customer Reviews ({reviews.length})
       </h2>
@@ -109,14 +112,14 @@ const SendReviews = ({ product }) => {
       <div className="mt-8">
         <h3 className="text-lg font-semibold mb-3">Write a Review</h3>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-md">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 ">
           {/* Name */}
           <div>
             <input
               type="text"
               placeholder="Your name"
               {...register("name", { required: "Name is required" })}
-              className="w-full border rounded-md px-3 py-2 text-sm"
+              className="input-field"
             />
             {errors.name && (
               <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
@@ -135,7 +138,7 @@ const SendReviews = ({ product }) => {
                   message: "Invalid email address",
                 },
               })}
-              className="w-full border rounded-md px-3 py-2 text-sm"
+              className="input-field"
             />
             {errors.email && (
               <p className="text-xs text-red-500 mt-1">
@@ -185,7 +188,7 @@ const SendReviews = ({ product }) => {
                   message: "Comment must be at least 2 characters",
                 },
               })}
-              className="w-full border rounded-md px-3 py-2 text-sm"
+              className="input-field"
             />
             {errors.comment && (
               <p className="text-xs text-red-500 mt-1">

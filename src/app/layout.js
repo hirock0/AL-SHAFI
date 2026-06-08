@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
             <Topbar />
             <Navbar />
           </>
-          <main className=" md:min-h-[calc(100vh-712px)]">
+          <main className=" md:min-h-[calc(100vh-665px)]">
             {children}
             <ScrollTop />
             <CartSidebar />

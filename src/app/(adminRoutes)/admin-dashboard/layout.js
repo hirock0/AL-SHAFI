@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
-import SideBar from "@/components/AdminDashboard/SideBar/SideBar";
+import SideBar from "@/components/AdminDashboard/SideBar/SideBar.js";
 import React from "react";
-import Navbar from "@/components/AdminDashboard/Navbar/Navbar";
+import Navbar from "@/components/AdminDashboard/Navbar/Navbar.js";
 import SidebarOverlay from "@/components/SidebarOverlay/SidebarOverlay";
 
 const Layout = ({ children }) => {

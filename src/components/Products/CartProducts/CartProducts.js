@@ -1,5 +1,5 @@
 "use client";
-import QtyBtn from "@/components/UI/Products/QtyBtn/QtyBtn";
+import QtyBtn from "@/components/Ui/Products/QtyBtn/QtyBtn.js";
 import { useCart } from "@/hooks/carts/useCart";
 import { useFetchCarts } from "@/hooks/carts/useFetchcarts";
 import Image from "next/image";

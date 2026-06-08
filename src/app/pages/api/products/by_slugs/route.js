@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect/dbConnect";
-import Product from "@/models/Products/Product/Product";
+import Product from "@/models/Products/Product.js";
 export async function GET(req) {
   try {
     await dbConnect();
     const url = new URL(req.url);
     const slugsQuery = url.searchParams.get("slugs");
+    
     if (!slugsQuery) {
       return NextResponse.json({
         message: "No slugs provided",

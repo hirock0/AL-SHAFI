@@ -1,6 +1,6 @@
 "use client";
 
-import AddCartBtn from "@/components/UI/Products/AddCartBtn/AddCartBtn";
+import AddCartBtn from "@/components/Ui/Products/AddCartBtn/AddCartBtn";
 import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";

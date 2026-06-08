@@ -1,8 +1,8 @@
 export const dynamic = "force-dynamic";
 import { Banners } from "@/actions/actions";
-import BannerForm from "@/components/AdminDashboard/BannerForm/BannerForm";
-import DeleteBtn from "@/components/Ui/Admin/Banner/DeleteBtn/DeleteBtn";
-import UpdateBtn from "@/components/Ui/Admin/Banner/UpdateBtn/UpdateBtn";
+import BannerForm from "@/components/AdminDashboard/BannerForm/BannerForm.js";
+import DeleteBtn from "@/components/Ui/Admin/Banner/DeleteBtn/DeleteBtn.js";
+import UpdateBtn from "@/components/Ui/Admin/Banner/UpdateBtn/UpdateBtn.js";
 import Image from "next/image";
 
 const BannerManagement = async () => {

@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 import { ReviewsByStatus } from "@/actions/actions";
-import ReviewTable from "@/components/AdminDashboard/Reviews/ReviewTable/ReviewTable";
+import ReviewTable from "@/components/AdminDashboard/Reviews/ReviewTable/ReviewTable.js";
 import Link from "next/link";
 import { CheckCircle, Clock, Filter } from "lucide-react";
 
